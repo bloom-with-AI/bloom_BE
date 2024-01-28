@@ -27,7 +27,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${GITHUB_SHA::7}
+          tags: ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${{github.run_number}}
           secrets: |
             GIT_AUTH_TOKEN=${{ secrets.GIT_TOKEN }}
 
@@ -44,8 +44,8 @@ jobs:
           password: ${{ secrets.DEV_PASSWORD }}
           port: ${{ secrets.DEV_PORT }}
           script: |
-            docker pull ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${GITHUB_SHA::7}
+            docker pull ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${{github.run_number}}
             docker stop $(docker ps -a -q)
             docker rm $(docker ps -a -q)
-            docker run -d -p 8080:80 ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${GITHUB_SHA::7}
+            docker run -d -p 8080:80 ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${{github.run_number}}
             docker image prune -f
