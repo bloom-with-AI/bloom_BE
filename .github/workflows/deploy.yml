@@ -1,0 +1,29 @@
+name: Node.js CICD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+     strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Docker build
+      run: |
+        docker login bloom.kr.ncr.ntruss.com -u ${{ secrets.USERNAME }} -p ${{ secrets.PASSWORD }}
+        docker build -t bloom .
+        docker tag bloom bloom.kr.ncr.ntruss.com/bloom:${GITHUB_SHA::7}
+        docker push bloom.kr.ncr.ntruss.com/bloom:${GITHUB_SHA::7}
