@@ -47,5 +47,5 @@ jobs:
             docker pull ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${{github.run_number}}
             docker stop $(docker ps -a -q)
             docker rm $(docker ps -a -q)
-            docker run -d -p 8080:80 ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${{github.run_number}}
+            docker run -d -p 80:8080 ${{ secrets.NCP_CONTAINER_REGISTRY }}/bloom:${GITHUB_SHA::7}
             docker image prune -f
