@@ -26,8 +26,8 @@ app.use("/login", [userRouter]);
 
 // app.use("/user", [userRouter]);
 
-const searchRouter = require("./api/routes/search");
-app.use("/search", [searchRouter]);
+// const searchRouter = require("./api/routes/search");
+// app.use("/search", [searchRouter]);
 
 app.listen(port, () => {
   console.log(`${port}서버에 연결되었습니다.`);
