@@ -24,7 +24,7 @@ const kakaoLogin = async (code, res) => {
       client_id: config.kakao.client_id,
       redirect_uri: config.kakao.redirect_url,
       code: code,
-      // client_secret: config.kakao.client_secret,
+      client_secret: config.kakao.client_secret,
     };
 
     const params = new URLSearchParams(requestData).toString();
@@ -73,17 +73,27 @@ const kakaoLogin = async (code, res) => {
 
     const kakaoUser = await User.findOneByKakaoId(kakaoId);
 
-    if (!kakaoUser) {
-      const newKakaoUser = await User.createKakaoUser(userInfo);
+    if (kakaoUser.length === 0) {
+      await User.createKakaoUser(userInfo);
+
+      const newKakaoUser = await User.findOneByKakaoId(kakaoId);
 
       return {
         loginSuccess: true,
-        newKakaoUser,
+        kakaoUser: {
+          userId: newKakaoUser[0].user_id,
+          profile: newKakaoUser[0].profile_url,
+          nickName: newKakaoUser[0].name,
+        },
       };
     } else {
       return {
         loginSuccess: true,
-        kakaoUser,
+        kakaoUser: {
+          userId: kakaoUser[0].user_id,
+          profile: kakaoUser[0].profile_url,
+          nickName: kakaoUser[0].name,
+        },
       };
     }
   } catch (err) {
