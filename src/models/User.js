@@ -1,9 +1,13 @@
 const dbConnection = require("../utils/db");
 const { v4: UUID } = require("uuid");
 
-const findOneByKakaoId = (kakaoId) => {
-  const query = `SELECT * FROM socialLogin WHERE provider = 'kakao' AND provider_id = ${kakaoId};`;
-  doQuery(query);
+const findOneByKakaoId = async (kakaoId) => {
+  const query = `SELECT * FROM socialLogin s
+                  inner join users u on s.user_id = u.user_id
+                  WHERE provider = 'kakao' AND provider_id = ${kakaoId};`;
+  const userInfo = await doQuery(query);
+
+  return userInfo;
 };
 
 const createKakaoUser = async (userInfo) => {
