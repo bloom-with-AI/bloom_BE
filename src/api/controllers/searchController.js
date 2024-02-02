@@ -145,21 +145,21 @@ const searchBasedLocation = () => {
 const searchByKeywords = async (req, res) => {
   try {
     const {
-      hall_type,
-      wedding_style,
+      hallType,
+      weddingStyle,
       mood,
       meal,
-      min_guarantee,
+      minGuarantee,
       parking,
       keyword,
     } = req.query;
 
     console.log(
-      hall_type,
-      wedding_style,
+      hallType,
+      weddingStyle,
       mood,
       meal,
-      min_guarantee,
+      minGuarantee,
       parking,
       keyword
     );
@@ -182,4 +182,26 @@ const searchByKeywords = async (req, res) => {
   }
 };
 
-module.exports = { searchController, searchBasedLocation, searchByKeywords };
+// 간략(summary) 페이지 정보
+const weddingSummary = async (req, res) => {
+  const { mapId } = req.params;
+  const venueSummary = await searchService.searchVenueInfo([mapId, true], res);
+
+  return venueSummary;
+};
+
+// 디테일(detail) 페이지 정보
+const weddingDetail = async (req, res) => {
+  const { mapId } = req.params;
+  const venueDetail = await searchService.searchVenueInfo([mapId, false], res);
+
+  return venueDetail;
+};
+
+module.exports = {
+  searchController,
+  searchBasedLocation,
+  searchByKeywords,
+  weddingDetail,
+  weddingSummary,
+};
