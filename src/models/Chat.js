@@ -63,7 +63,8 @@ async function getWeddingMeta() {
             pd.is_stage_available,
             pd.ceremony_interval,
             pd.parking,
-            m.place_name
+            m.place_name,
+            m.region
         FROM placeDetail pd
         JOIN map m ON pd.place_id = m.map_id`;
 
@@ -72,7 +73,7 @@ async function getWeddingMeta() {
     // const columnHeaders = "place_id,place_name,hall_type,mood,meal,brid_type,min_guarantee,capacity,virgin_road_length,is_stage_available,ceremony_interval,parking,phone";
 
     const documents = result.map(row =>
-        `${row.place_id}?${row.place_name}?${row.hall_type}?${row.mood}?${row.meal}?${row.brid_type}?${row.min_guarantee}?${row.capacity}?${row.virgin_road_length}?${row.is_stage_available}?${row.ceremony_interval}?${row.parking}`
+        `${row.place_id}?${row.place_name}?${row.hall_type}?${row.mood}?${row.meal}?${row.brid_type}?${row.min_guarantee}?${row.capacity}?${row.virgin_road_length}?${row.is_stage_available}?${row.ceremony_interval}?${row.parking}?${row.region}`
     );
 
     // documents.unshift(columnHeaders);
