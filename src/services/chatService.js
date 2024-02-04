@@ -93,7 +93,7 @@ const getGPT = async (userId, user_input) => {
         };
 
         res = await createChatHistory(responseChatInfo);
-        
+
         if (res.map_info && res.map_info.length > 0) {
             const mapIds = res.map_info
             const mapDetails = await getMapDetails(mapIds);
