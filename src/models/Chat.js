@@ -18,8 +18,14 @@ async function getAllchatHistory(userId) {
             if (chatHistory.mapInfo) {
                 try {
                     const mapIds = JSON.parse(chatHistory.mapInfo);
-                    const mapDetails = await getMapDetails(mapIds);
-                    chatHistory.mapInfo = mapDetails;
+                    console.log(mapIds > 0)
+                    if (mapIds && mapIds.length > 0) {
+                        console.log(1111)
+                        const mapDetails = await getMapDetails(mapIds);
+                        chatHistory.mapInfo = mapDetails;
+                    }else{
+                        chatHistory.mapInfo = []
+                    }
                 } catch (parseError) {
                     console.error('JSON parsing error for mapInfo:', parseError);
                     chatHistory.mapInfo = [];
@@ -148,7 +154,7 @@ const doQuery = (query, params) => {
                 console.error('Query Error:', error);
                 reject(error);
             } else {
-                console.log('Query Results:', results);
+                // console.log('Query Results:', results);
                 resolve(results);
             }
         });
