@@ -1,4 +1,4 @@
-const dbConnection = require("../utils/db");
+const dbConnection = require('../utils/db');
 const {v4: UUID} = require("uuid");
 
 async function getAllchatHistory(userId) {
@@ -129,12 +129,26 @@ const createChatHistory = async (chatInfo) => {
     }
 };
 
+// const doQuery = (query, params) => {
+//     return new Promise((resolve, reject) => {
+//         dbConnection.query(query, params, (error, results, fields) => {
+//             if (error) {
+//                 reject(error);
+//             } else {
+//                 resolve(results);
+//             }
+//         });
+//     });
+// };
+
 const doQuery = (query, params) => {
     return new Promise((resolve, reject) => {
         dbConnection.query(query, params, (error, results, fields) => {
             if (error) {
+                console.error('Query Error:', error);
                 reject(error);
             } else {
+                console.log('Query Results:', results);
                 resolve(results);
             }
         });
