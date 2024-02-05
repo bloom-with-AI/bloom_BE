@@ -89,7 +89,7 @@ const getGPT = async (userId, user_input) => {
             user_id: userId,
             chat_type: 'chatbot',
             message: responseData.message,
-            map_info: responseData.mapInfo ? JSON.stringify(responseData.mapInfo) : ''
+            map_info: responseData.mapInfo ? JSON.stringify(responseData.mapInfo) : JSON.stringify([])
         };
 
         res = await createChatHistory(responseChatInfo);
