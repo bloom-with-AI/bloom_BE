@@ -14,21 +14,15 @@ try {
   console.error("Error reading YAML file:", error);
 }
 
-const connection = mysql.createConnection({
+const dbConnection = mysql.createPool({
   host: config.database.host,
   port: config.database.port,
   user: config.database.user,
   password: config.database.password,
   database: config.database.databaseName,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
-connection.connect((err) => {
-  if (err) {
-    console.log(err)
-    console.log("db is not connected");
-    return;
-  }
-  console.log("db is connected successfully");
-});
-
-module.exports = connection;
+module.exports = dbConnection;
