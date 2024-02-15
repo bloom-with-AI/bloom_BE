@@ -69,14 +69,15 @@ const kakaoLogin = async (code, res) => {
       kakaoThumbnail: kakaoThumbnail,
       accessToken: accessToken.access_token,
       refreshToken: accessToken.refresh_token,
+      provider: "kakao",
     };
 
-    const kakaoUser = await User.findOneByKakaoId(kakaoId);
+    const kakaoUser = await User.findOneBySocialId(kakaoId, "kakao");
 
     if (kakaoUser.length === 0) {
       await User.createKakaoUser(userInfo);
 
-      const newKakaoUser = await User.findOneByKakaoId(kakaoId);
+      const newKakaoUser = await User.findOneBySocialId(kakaoId, "kakao");
 
       return {
         loginSuccess: true,
@@ -106,6 +107,94 @@ const kakaoLogin = async (code, res) => {
   }
 };
 
+//네이버 인가코드로 로그인 진행
+const naverLogin = async (code, state, res) => {
+  try {
+    const requestData = {
+      grant_type: "authorization_code",
+      client_id: config.naver.login.client_id,
+      client_secret: config.naver.login.client_secret,
+      code: code,
+      state: state,
+    };
+
+    const params = new URLSearchParams(requestData).toString();
+
+    const requestUrl = `https://nid.naver.com/oauth2.0/token?${params}`;
+
+    //인가코드로 토큰 발급 요청
+    const accessTokenRes = await fetch(requestUrl, {
+      method: "POST",
+    });
+
+    const token = await accessTokenRes.json();
+
+    //액세스토큰으로 네이버에 유저 정보 요청
+    const naverUserInfoReqUrl = "https://openapi.naver.com/v1/nid/me";
+
+    //prettier-ignore
+    const naverMemberInfoRes = await fetch(naverUserInfoReqUrl, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${token.access_token}`,
+      },
+    });
+
+    const naverMemberInfo = await naverMemberInfoRes.json();
+
+    const naverId = naverMemberInfo.response.id;
+    const naverNickname = naverMemberInfo.response.nickname;
+    const naverProfileImage = naverMemberInfo.response.profile_image;
+    const naverEmail = naverMemberInfo.response.email;
+    const naverGender = naverMemberInfo.response.gender;
+
+    const userInfo = {
+      naverId: naverId,
+      naverNickname: naverNickname,
+      naverProfileImage: naverProfileImage,
+      naverEmail: naverEmail,
+      naverGender: naverGender,
+      accessToken: token.access_token,
+      refreshToken: token.refresh_token,
+      provider: "naver",
+    };
+
+    const naverUser = await User.findOneBySocialId(naverId, "naver");
+
+    if (naverUser.length === 0) {
+      await User.createNaverUser(userInfo);
+
+      const newNaverUser = await User.findOneBySocialId(naverId, "naver");
+
+      return {
+        loginSuccess: true,
+        naverUser: {
+          userId: newNaverUser[0].user_id,
+          profile: newNaverUser[0].profile_url,
+          nickName: newNaverUser[0].name,
+        },
+      };
+    } else {
+      return {
+        loginSuccess: true,
+        naverUser: {
+          userId: naverUser[0].user_id,
+          profile: naverUser[0].profile_url,
+          nickName: naverUser[0].name,
+        },
+      };
+    }
+  } catch (err) {
+    console.error("네이버 로그인 error:", err);
+
+    return res.json({
+      loginSuccess: false,
+      message: "네이버 로그인 중 오류가 발생했습니다.",
+    });
+  }
+};
+
 module.exports = {
   kakaoLogin,
+  naverLogin,
 };
