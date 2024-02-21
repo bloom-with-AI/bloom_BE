@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 
+// const searchController = require("./api/controllers/searchController");
+
 const port = 8080;
 const app = express();
 
@@ -22,8 +24,15 @@ app.get("/", (req, res) => {
   return res.send("Hello");
 });
 
+// app.get("/", (req, res) => {
+//   const result = searchController.searchBasedLocation(req);
+
+//   return result;
+// });
+
 const userRouter = require("./api/routes/user");
 app.use("/login", [userRouter]);
+app.use("/logout", [userRouter]);
 
 const chatRouter = require("./api/routes/chat");
 app.use("/chat", chatRouter);
