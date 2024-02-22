@@ -12,4 +12,6 @@ router.get("/wedding/detail/:mapId", searchController.weddingDetail);
 //웨딩홀 간략 정보
 router.get("/wedding/summary/:mapId", searchController.weddingSummary);
 
+router.get("/place", searchController.searchBasedLocation);
+
 module.exports = router;
