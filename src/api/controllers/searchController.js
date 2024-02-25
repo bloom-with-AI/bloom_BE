@@ -1,26 +1,13 @@
 const express = require("express");
+require("dotenv").config();
 const searchService = require("../../services/searchService");
 
 const searchController = express.Router();
 
-const fs = require("fs");
-const path = require("path");
-const yaml = require("js-yaml");
 const fetch = require("node-fetch");
 const { URLSearchParams } = require("url");
 
-// YAML 파일 로드 및 파싱
-const yamlFilePath = path.join(__dirname, "application.yml");
-let config;
-
 const searchBasedLocation = () => {
-  try {
-    const configFile = fs.readFileSync(yamlFilePath, "utf8");
-    config = yaml.load(configFile);
-  } catch (error) {
-    console.error("Error reading YAML file:", error);
-  }
-
   app.get("/image", async (req, res) => {
     const { query, display, start } = req.query;
 
@@ -37,14 +24,14 @@ const searchBasedLocation = () => {
       });
 
       const localUrl = `${
-        config.naver.url.search.local
+        process.env.NAVER_URL_SEARCH_LOCAL
       }?${localParams.toString()}`;
 
       const localResponse = await fetch(localUrl, {
         method: "GET",
         headers: {
-          "X-Naver-Client-Id": config.naver.client.id,
-          "X-Naver-Client-Secret": config.naver.client.secret,
+          "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID,
+          "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET,
         },
       });
 
@@ -60,13 +47,13 @@ const searchBasedLocation = () => {
             display: 1,
           });
           const imageUrl = `${
-            config.naver.url.search.image
+            process.env.NAVER_URL_SEARCH_IMAGE
           }?${imageParams.toString()}`;
 
           const imageResponse = await fetch(imageUrl, {
             headers: {
-              "X-Naver-Client-Id": config.naver.client.id,
-              "X-Naver-Client-Secret": config.naver.client.secret,
+              "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID,
+              "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET,
             },
           });
 
@@ -81,9 +68,9 @@ const searchBasedLocation = () => {
           // const blogUrl = `https://openapi.naver.com/v1/search/blog.json?${blogParams.toString()}`;
           // const blogResponse = await fetch(blogUrl, {
           //     headers: {
-          //         'X-Naver-Client-Id': config.naver.client.id,
-          //         'X-Naver-Client-Secret': config.naver.client.secret
-          //     }
+          //         "X-Naver-Client-Id": process.env.NAVER_CLIENT_ID,
+          //         "X-Naver-Client-Secret": process.env.NAVER_CLIENT_SECRET,
+          // },
           // });
           //
           // const blogData = await blogResponse.json();
