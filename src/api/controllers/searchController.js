@@ -131,6 +131,8 @@ const searchBasedLocation = () => {
 };
 
 const searchByKeywords = async (req, res) => {
+  // #swagger.tags = ['Search']
+  // #swagger.summary = '키워드 검색'
   try {
     const result = await searchService.searchByKeywords(req);
 
@@ -154,6 +156,8 @@ const searchByKeywords = async (req, res) => {
 
 // 간략(summary) 페이지 정보
 const weddingSummary = async (req, res) => {
+  // #swagger.tags = ['Search']
+  // #swagger.summary = '웨딩홀 요약 정보 검색'
   const { mapId } = req.params;
   const venueSummary = await searchService.searchVenueInfo([mapId, true], res);
 
@@ -162,6 +166,8 @@ const weddingSummary = async (req, res) => {
 
 // 디테일(detail) 페이지 정보
 const weddingDetail = async (req, res) => {
+  // #swagger.tags = ['Search']
+  // #swagger.summary = '웨딩홀 상세 정보 검색'
   const { mapId } = req.params;
   const venueDetail = await searchService.searchVenueInfo([mapId, false], res);
 
