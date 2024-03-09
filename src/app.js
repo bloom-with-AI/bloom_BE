@@ -1,7 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 
-// const searchController = require("./api/controllers/searchController");
+const swaggerUi = require("swagger-ui-express");
+const swaggerFile = require("./swagger/swagger-output.json");
 
 const port = 8080;
 const app = express();
@@ -45,3 +46,9 @@ app.use("/chat", chatRouter);
 app.listen(port, () => {
   console.log(`${port}서버에 연결되었습니다.`);
 });
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerFile, { explorer: true })
+);
