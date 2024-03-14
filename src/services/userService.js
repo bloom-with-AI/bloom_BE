@@ -47,7 +47,8 @@ const kakaoLogin = async (code, res) => {
       kakaoNickname: kakaoMemberInfo.properties.nickname,
       kakaoEmail: kakaoMemberInfo.kakao_account.email,
       kakaoProfileImage: kakaoMemberInfo.properties.profile_image,
-      kakaoThumbnail: kakaoMemberInfo.properties.thumbnail_image,
+      kakaoGender:
+        kakaoMemberInfo.kakao_account.gender === "female" ? "F" : "M",
       accessToken: accessToken.access_token,
       refreshToken: accessToken.refresh_token,
       provider: "kakao",
@@ -72,6 +73,14 @@ const kakaoLogin = async (code, res) => {
         },
       };
     } else {
+      const updateData = {
+        profileUrl: userInfo.kakaoProfileImage,
+        accessToken: userInfo.accessToken,
+        refreshToken: userInfo.refreshToken,
+      };
+
+      await User.updateBySocialId(kakaoUser[0].social_login_id, updateData);
+
       return {
         loginSuccess: true,
         kakaoUser: {
