@@ -32,8 +32,7 @@ app.get("/", (req, res) => {
 // });
 
 const userRouter = require("./api/routes/user");
-app.use("/login", [userRouter]);
-app.use("/logout", [userRouter]);
+app.use("/auth", [userRouter]);
 
 const chatRouter = require("./api/routes/chat");
 app.use("/chat", chatRouter);

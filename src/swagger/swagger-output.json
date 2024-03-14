@@ -35,7 +35,7 @@
         }
       }
     },
-    "/login/kakao/callback": {
+    "/auth/login/kakao/callback": {
       "get": {
         "tags": [
           "Users"
@@ -56,7 +56,7 @@
         }
       }
     },
-    "/login/naver/callback": {
+    "/auth/login/naver/callback": {
       "get": {
         "tags": [
           "Users"
@@ -82,76 +82,7 @@
         }
       }
     },
-    "/login/{userId}": {
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "소셜 로그아웃",
-        "description": "",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/logout/kakao/callback": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "카카오 소셜 로그인",
-        "description": "",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/logout/naver/callback": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "네이버 소셜 로그인",
-        "description": "",
-        "parameters": [
-          {
-            "name": "code",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "state",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/logout/{userId}": {
+    "/auth/logout/{userId}": {
       "post": {
         "tags": [
           "Users"
