@@ -125,6 +125,27 @@
         }
       }
     },
+    "/search/map/wedding": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "키워드 검색(Index)",
+        "description": "",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/search/wedding/detail/{mapId}": {
       "get": {
         "tags": [
@@ -165,39 +186,6 @@
         "responses": {
           "default": {
             "description": ""
-          }
-        }
-      }
-    },
-    "/search/place": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "display",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "start",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
