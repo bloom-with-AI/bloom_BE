@@ -22,8 +22,6 @@ const searchByKeywords = async (req) => {
 
   const conditionArr = Object.entries(conditions);
 
-  console.log("conditionArr=====>", conditionArr);
-
   //query 만드는 곳
 
   for (let i = 0; i < conditionArr.length; i++) {
@@ -90,8 +88,6 @@ const searchByKeywords = async (req) => {
     }
   }
 
-  console.log("combineWord=======>", combineWord);
-
   let searchResult;
 
   for (let i = 0; i < conditionArr.length; i++) {
@@ -118,11 +114,7 @@ const makeQuery = async (type, content, columnName) => {
   if (type === "object") {
     for (let i = 0; i < content.length; i++) {
       if (columnName === "p.min_guarantee" || columnName === "p.parking") {
-        console.log("if문 진입 content[i]=======>", content[i]);
-
         filterData = await contentFilter(columnName, content[i]);
-
-        console.log("가공 후 content[i]=======>", filterData);
 
         if (i === 0) {
           word =
@@ -158,11 +150,8 @@ const makeQuery = async (type, content, columnName) => {
       }
     }
   } else if (type === "string") {
-    console.log("content=======>", content);
-
     if (columnName === "p.min_guarantee" || columnName === "p.parking") {
       let filterData = await contentFilter(columnName, content);
-      console.log("if 문 진입 content=======>", filterData);
 
       word =
         word +
@@ -181,7 +170,6 @@ const makeQuery = async (type, content, columnName) => {
 const contentFilter = (columnName, data) => {
   let filterData;
 
-  console.log("data in 185 =======>", data);
   if (columnName === "p.brid_type") {
     filterData = data.substring(0, 2);
 
@@ -221,6 +209,112 @@ const contentFilter = (columnName, data) => {
   return filterData;
 };
 
+const searchWithIndexing = async (req) => {
+  let query = "";
+
+  const conditionMap = new Map();
+
+  Object.entries(req.query).forEach(([column, value]) => {
+    conditionMap.set(column, Array.isArray(value) ? value : [value]);
+  });
+
+  const columnArr = [...conditionMap.keys()];
+
+  //쿼리 생성문
+  for (let i = 0; i < conditionMap.size; i++) {
+    let column = columnArr[i];
+
+    //"키워드" 검색일 경우
+    if (column === "keyword") {
+      query += `MATCH (place_name) AGAINST ('${conditionMap.get(column)}')`;
+
+      //"필터" 검색일 경우
+    } else {
+      let columnQuery = "";
+
+      //동일 컬럼에 대한 조건들은 OR문으로 묶어줌
+      for (let j = 0; j < conditionMap.get(column).length; j++) {
+        if (j < conditionMap.get(column).length && j > 0) {
+          columnQuery += " OR ";
+        }
+
+        const columnValue = conditionMap.get(column);
+
+        //Inteager 속성의 컬럼 쿼리문
+        if (column === "minGuarantee" || column === "parking") {
+          const columnMap =
+            column === "minGuarantee" ? guaranteeMap : parkingMap;
+
+          const min = columnMap[columnValue[j]].min;
+          const max = columnMap[columnValue[j]].max;
+
+          if (min === undefined || max === undefined) {
+            columnQuery +=
+              min === undefined
+                ? `${columnMapping[column]} <= ${max}`
+                : `${columnMapping[column]} >= ${min}`;
+          } else {
+            columnQuery += `${columnMapping[column]} BETWEEN ${min} AND ${max}`;
+          }
+
+          //String 속성의 컬럼 쿼리문
+        } else {
+          columnQuery += `${columnMapping[column]} LIKE '%${columnValue[j]}%'`;
+        }
+      }
+
+      query += `(${columnQuery})`;
+    }
+
+    if (i < conditionMap.size - 1) {
+      query += " AND ";
+    }
+  }
+
+  const searchResult =
+    conditionMap.size === 0
+      ? await Venue.getAllList()
+      : await Venue.getSearchResult(query);
+
+  return searchResult;
+};
+
+const columnMapping = {
+  hallType: "hall_type",
+  bridType: "brid_type",
+  mood: "mood",
+  meal: "meal",
+  minGuarantee: "min_guarantee",
+  parking: "parking",
+  keyword: "keyword",
+};
+
+const guaranteeMap = {
+  "100명 미만": { min: 0, max: 100 }, // 0 <= x <= 100
+  "150명": { min: 101, max: 150 }, // 101 <= x <= 150
+  "200명": { min: 151, max: 200 }, // 151 <= x <= 200
+  "250명": { min: 201, max: 250 }, // 201 <= x <= 250
+  "300명": { min: 251, max: 300 }, // 251 <= x <= 300
+  "350명": { min: 301, max: 350 }, // 301 <= x <= 350
+  "400명": { min: 351, max: 400 }, // 351 <= x <= 400
+  "450명": { min: 401, max: 450 }, // 401 <= x <= 450
+  "500명": { min: 451, max: 500 }, // 451 <= x <= 500
+  "500명 이상": { min: 501 }, // 501 <= x
+};
+
+//prettier-ignore
+const parkingMap = {
+  "불가": { max: 0 }, // x <= 0
+  "100대 미만": { min: 1, max: 99 }, // 1 <= x <= 99
+  "100-199대": { min: 100, max: 199 }, // 100 <= x <= 199
+  "200-299대": { min: 200, max: 299 }, // 200 <= x <= 299
+  "300-399대": { min: 300, max: 399 }, // 300 <= x <= 399
+  "400-499대": { min: 400, max: 499 }, // 400 <= x <= 350
+  "500-599대": { min: 500, max: 599 }, // 500 <= x <= 400
+  "600-1000대": { min: 600, max: 1000 }, // 600 <= x <= 1000
+  "무제한": { min: 1001 }, // 1001 <= x
+};
+
 const searchVenueInfo = async ([mapId, isSummary], res) => {
   try {
     let venueInfo = await Venue.findBymapId(mapId);
@@ -254,4 +348,4 @@ const searchVenueInfo = async ([mapId, isSummary], res) => {
   }
 };
 
-module.exports = { searchByKeywords, searchVenueInfo };
+module.exports = { searchByKeywords, searchVenueInfo, searchWithIndexing };
