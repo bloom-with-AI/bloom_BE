@@ -108,13 +108,12 @@ const createChatHistory = async (chatInfo) => {
         const selectQuery = `SELECT * FROM chatHistory WHERE chat_id = ?;`;
         const newChatHistoryResult = await doQuery(selectQuery, [lastId]);
 
-        // 삽입된 행의 데이터 반환 전, map_info를 JSON 객체로 변환
         const newChatHistory = newChatHistoryResult[0];
         if (newChatHistory && newChatHistory.map_info) {
             newChatHistory.map_info = JSON.parse(newChatHistory.map_info);
         }
 
-        return newChatHistory; // map_info가 JSON 객체로 변환된 채팅 기록 반환
+        return newChatHistory;
     } catch (error) {
         console.error('Error saving chat history:', error);
         throw error;
