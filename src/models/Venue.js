@@ -1,8 +1,10 @@
 const dbConnection = require("../utils/db");
 
-const getAllList = async () => {
-  const query =
-    "select * from map m inner join placeDetail p on m.place_id = p.place_id;";
+const getSearchResult = async (keyword) => {
+  const query = `select * from map m
+                inner join placeDetail p on m.place_id = p.place_id
+                where m.place_name like '%${keyword}%' or m.address_name like '%${keyword}%';`;
+
   const result = await doQuery(query);
 
   return result;
@@ -30,4 +32,4 @@ const doQuery = (query) => {
   });
 };
 
-module.exports = { getAllList, findBymapId };
+module.exports = { findBymapId, getSearchResult };
