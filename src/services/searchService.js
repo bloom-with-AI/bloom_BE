@@ -1,9 +1,9 @@
 const Venue = require("../models/Venue");
 
-const searchByKeywords = () => {
-  const list = Venue.getAllList();
+const searchByKeywords = async (conditions) => {
+  const searchResult = await Venue.getSearchResult(conditions.keyword);
 
-  return list;
+  return searchResult;
 };
 
 const searchVenueInfo = async ([mapId, isSummary], res) => {
