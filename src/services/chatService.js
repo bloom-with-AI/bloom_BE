@@ -57,7 +57,7 @@ const getGPT = async (userId, user_input) => {
 
         console.log(data);
 
-        const requestUrl = `http://api.bloomm.co.kr:8000/bloom/chat`;
+        const requestUrl = `http://ai.bloomm.co.kr:8000/bloom/chat`;
 
         const response = await fetch(requestUrl, {
             method: "POST",
