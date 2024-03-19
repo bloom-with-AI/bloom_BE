@@ -60,7 +60,7 @@ const getGPT = async (userId, user_input) => {
         const requestUrl = `http://ai.bloomm.co.kr:8000/bloom/chat`;
 
         // const requestUrl = `http://0.0.0.0:8000/bloom/chat`;
-        
+
 
         const response = await fetch(requestUrl, {
             method: "POST",
@@ -89,12 +89,12 @@ const getGPT = async (userId, user_input) => {
             user_id: userId,
             chat_type: 'chatbot',
             message: responseData.message,
-            map_info: responseData.mapInfo ? JSON.stringify(responseData.mapInfo) : ''
+            map_info: responseData.mapInfo ? JSON.stringify(responseData.mapInfo) : JSON.stringify([])
         };
 
         res = await createChatHistory(responseChatInfo);
-        console.log(res)
-        if (res.map_info) {
+
+        if (res.map_info && res.map_info.length > 0) {
             const mapIds = res.map_info
             const mapDetails = await getMapDetails(mapIds);
             console.log(mapDetails)
