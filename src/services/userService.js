@@ -99,7 +99,7 @@ const kakaoLogin = async (code, res) => {
   } catch (err) {
     console.error("카카오 로그인 error:", err);
 
-    return res.status(500).json({
+    return res.json({
       loginSuccess: false,
       message: "카카오 로그인 중 오류가 발생했습니다.",
     });
