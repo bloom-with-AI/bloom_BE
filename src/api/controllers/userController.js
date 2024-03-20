@@ -15,4 +15,18 @@ const kakaoCallback = async (req, res) => {
   }
 };
 
-module.exports = { userController, kakaoCallback };
+//네이버 로그인 진행
+const naverCallback = async (req, res) => {
+  try {
+    let { code } = req.query;
+    let { state } = req.query;
+
+    const naverUser = await userService.naverLogin(code, state, res);
+
+    return res.send(naverUser);
+  } catch (err) {
+    return res.send(err);
+  }
+};
+
+module.exports = { userController, kakaoCallback, naverCallback };
