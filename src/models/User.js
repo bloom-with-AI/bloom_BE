@@ -10,6 +10,22 @@ const findOneBySocialId = async (socialId, provider) => {
   return userInfo;
 };
 
+const findOneByUserId = async (userId) => {
+  const query = `SELECT s.access_token as access_token,
+                        s.refresh_token as refresh_token,
+                        u.user_id as user_id,
+                        u.social_login_id as social_login_id,
+                        s.provider as provider,
+                        s.provider_id as provider_id
+                  FROM socialLogin s
+                  INNER JOIN users u on s.user_id = u.user_id
+                  WHERE u.user_id = ${userId};`;
+
+  const userInfo = await doQuery(query);
+
+  return userInfo;
+};
+
 const createKakaoUser = async (userInfo) => {
   const createUserQuery = `INSERT INTO users (email, name, password) VALUES ('${
     userInfo.kakaoEmail
@@ -46,6 +62,24 @@ const createNaverUser = async (userInfo) => {
   return Promise.resolve("회원가입이 완료되었습니다.");
 };
 
+const updateBySocialId = async (socialId, updateInfo) => {
+  const updateUserQuery = `UPDATE socialLogin 
+                            SET profile_url = '${updateInfo.profileUrl}',
+                            access_token = '${updateInfo.accessToken}',
+                            refresh_token = '${updateInfo.refreshToken}'
+                            WHERE social_login_id = ${socialId};`;
+
+  await doQuery(updateUserQuery);
+};
+
+const deleteTokenByUserId = async (userId) => {
+  const deleteTokenQuery = `UPDATE socialLogin
+                        SET access_token = ""
+                        WHERE user_id = ${userId};`;
+
+  await doQuery(deleteTokenQuery);
+};
+
 const doQuery = (query) => {
   return new Promise((resolve, reject) => {
     dbConnection.query(query, (err, rows) => {
@@ -60,6 +94,9 @@ const doQuery = (query) => {
 
 module.exports = {
   findOneBySocialId,
+  findOneByUserId,
   createKakaoUser,
   createNaverUser,
+  updateBySocialId,
+  deleteTokenByUserId,
 };

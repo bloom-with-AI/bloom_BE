@@ -2,7 +2,9 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const path = require("path");
 const yaml = require("js-yaml");
+require("dotenv").config();
 const User = require("../models/User");
+const { resolveSoa } = require("dns");
 
 // YAML 파일 로드 및 파싱
 const yamlFilePath = path.join(__dirname, "..", "application.yml");
@@ -55,29 +57,26 @@ const kakaoLogin = async (code, res) => {
 
     const kakaoMemberInfo = await kakaoMemberInfoRes.json();
 
-    const kakaoId = kakaoMemberInfo.id;
-    const kakaoNickname = kakaoMemberInfo.properties.nickname;
-    const kakaoProfileImage = kakaoMemberInfo.properties.profile_image;
-    const kakaoThumbnail = kakaoMemberInfo.properties.thumbnail_image;
-    const kakaoEmail = kakaoMemberInfo.kakao_account.email;
-
     const userInfo = {
-      kakaoId: kakaoId,
-      kakaoNickname: kakaoNickname,
-      kakaoEmail: kakaoEmail,
-      kakaoProfileImage: kakaoProfileImage,
-      kakaoThumbnail: kakaoThumbnail,
+      kakaoId: kakaoMemberInfo.id,
+      kakaoNickname: kakaoMemberInfo.properties.nickname,
+      kakaoEmail: kakaoMemberInfo.kakao_account.email,
+      kakaoProfileImage: kakaoMemberInfo.properties.profile_image,
+      kakaoThumbnail: kakaoMemberInfo.properties.thumbnail_image,
       accessToken: accessToken.access_token,
       refreshToken: accessToken.refresh_token,
       provider: "kakao",
     };
 
-    const kakaoUser = await User.findOneBySocialId(kakaoId, "kakao");
+    const kakaoUser = await User.findOneBySocialId(userInfo.kakaoId, "kakao");
 
     if (kakaoUser.length === 0) {
       await User.createKakaoUser(userInfo);
 
-      const newKakaoUser = await User.findOneBySocialId(kakaoId, "kakao");
+      const newKakaoUser = await User.findOneBySocialId(
+        userInfo.kakaoId,
+        "kakao"
+      );
 
       return {
         loginSuccess: true,
@@ -112,8 +111,8 @@ const naverLogin = async (code, state, res) => {
   try {
     const requestData = {
       grant_type: "authorization_code",
-      client_id: config.naver.login.client_id,
-      client_secret: config.naver.login.client_secret,
+      client_id: process.env.NAVER_LOGIN_CLIENT_ID,
+      client_secret: process.env.NAVER_LOGIN_CLIENT_SECRET,
       code: code,
       state: state,
     };
@@ -134,37 +133,34 @@ const naverLogin = async (code, state, res) => {
 
     //prettier-ignore
     const naverMemberInfoRes = await fetch(naverUserInfoReqUrl, {
-      method: "GET",
-      headers: {
-        "Authorization": `Bearer ${token.access_token}`,
-      },
-    });
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token.access_token}`,
+        },
+      });
 
     const naverMemberInfo = await naverMemberInfoRes.json();
 
-    const naverId = naverMemberInfo.response.id;
-    const naverNickname = naverMemberInfo.response.nickname;
-    const naverProfileImage = naverMemberInfo.response.profile_image;
-    const naverEmail = naverMemberInfo.response.email;
-    const naverGender = naverMemberInfo.response.gender;
-
     const userInfo = {
-      naverId: naverId,
-      naverNickname: naverNickname,
-      naverProfileImage: naverProfileImage,
-      naverEmail: naverEmail,
-      naverGender: naverGender,
+      naverId: naverMemberInfo.response.id,
+      naverNickname: naverMemberInfo.response.nickname,
+      naverProfileImage: naverMemberInfo.response.profile_image,
+      naverEmail: naverMemberInfo.response.email,
+      naverGender: naverMemberInfo.response.gender,
       accessToken: token.access_token,
       refreshToken: token.refresh_token,
       provider: "naver",
     };
 
-    const naverUser = await User.findOneBySocialId(naverId, "naver");
+    const naverUser = await User.findOneBySocialId(userInfo.naverId, "naver");
 
     if (naverUser.length === 0) {
       await User.createNaverUser(userInfo);
 
-      const newNaverUser = await User.findOneBySocialId(naverId, "naver");
+      const newNaverUser = await User.findOneBySocialId(
+        userInfo.naverId,
+        "naver"
+      );
 
       return {
         loginSuccess: true,
@@ -175,6 +171,14 @@ const naverLogin = async (code, state, res) => {
         },
       };
     } else {
+      const updateData = {
+        profileUrl: userInfo.naverProfileImage,
+        accessToken: userInfo.accessToken,
+        refreshToken: userInfo.refreshToken,
+      };
+
+      await User.updateBySocialId(naverUser[0].social_login_id, updateData);
+
       return {
         loginSuccess: true,
         naverUser: {
@@ -194,7 +198,50 @@ const naverLogin = async (code, state, res) => {
   }
 };
 
+//해당 유저가 kakao 유저인지 naver 유저인지 확인 후 해당하는 로그아웃 프로세스를 진행.
+const userLogout = async (userId, res) => {
+  try {
+    const logoutUser = await User.findOneByUserId(userId);
+
+    if (logoutUser[0].provider === "naver") {
+      await naverLogout(logoutUser[0].access_token);
+
+      await User.deleteTokenByUserId(logoutUser[0].user_id);
+    } else {
+      console.log("이곳은 카카오 로그아웃 진행 코드가 들어갈 예정입니다.");
+    }
+  } catch (err) {
+    console.log(err);
+
+    throw err;
+  }
+};
+
+const naverLogout = async (accessToken) => {
+  try {
+    const requestData = {
+      grant_type: "delete",
+      client_id: process.env.NAVER_LOGIN_CLIENT_ID,
+      client_secret: process.env.NAVER_LOGIN_CLIENT_SECRET,
+      access_token: accessToken,
+      service_provider: "NAVER",
+    };
+
+    const params = new URLSearchParams(requestData).toString();
+
+    const requestUrl = `https://nid.naver.com/oauth2.0/token?${params}`;
+
+    //엑세스토큰 네이버에서 삭제처리
+    await fetch(requestUrl, {
+      method: "POST",
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
 module.exports = {
   kakaoLogin,
   naverLogin,
+  userLogout,
 };
