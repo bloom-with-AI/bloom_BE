@@ -27,14 +27,14 @@ const findOneByUserId = async (userId) => {
 };
 
 const createKakaoUser = async (userInfo) => {
-  const createUserQuery = `INSERT INTO users (email, name, password) VALUES ('${
+  const createUserQuery = `INSERT INTO users (email, name, password, gender) VALUES ('${
     userInfo.kakaoEmail
-  }', '${userInfo.kakaoNickname}', '${UUID()}');`;
+  }', '${userInfo.kakaoNickname}', '${UUID()}', '${userInfo.kakaoGender}');`;
 
   const newUser = await doQuery(createUserQuery);
 
-  const createSocialUserQuery = `INSERT INTO socialLogin (provider_id, provider, access_token, profile_url, user_id) 
-  VALUES ('${userInfo.kakaoId}', '${userInfo.provider}', '${userInfo.accessToken}', '${userInfo.kakaoProfileImage}', ${newUser.insertId});`;
+  const createSocialUserQuery = `INSERT INTO socialLogin (provider_id, provider, access_token, refresh_token, profile_url, user_id) 
+  VALUES ('${userInfo.kakaoId}', '${userInfo.provider}', '${userInfo.accessToken}', '${userInfo.refreshToken}', '${userInfo.kakaoProfileImage}', ${newUser.insertId});`;
 
   const newKakaoUser = await doQuery(createSocialUserQuery);
 
