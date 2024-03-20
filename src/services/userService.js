@@ -175,11 +175,6 @@ const naverLogin = async (code, state, res) => {
     }
   } catch (err) {
     console.error("네이버 로그인 error:", err);
-
-    return res.json({
-      loginSuccess: false,
-      message: "네이버 로그인 중 오류가 발생했습니다.",
-    });
   }
 };
 
