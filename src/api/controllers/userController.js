@@ -29,4 +29,17 @@ const naverCallback = async (req, res) => {
   }
 };
 
-module.exports = { userController, kakaoCallback, naverCallback };
+//로그아웃
+const logout = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    await userService.userLogout(userId, res);
+
+    return res.send("로그아웃 성공!");
+  } catch (err) {
+    return res;
+  }
+};
+
+module.exports = { userController, kakaoCallback, naverCallback, logout };
