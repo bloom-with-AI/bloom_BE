@@ -1,21 +1,6 @@
 const fetch = require("node-fetch");
-const fs = require("fs");
-const path = require("path");
-const yaml = require("js-yaml");
 require("dotenv").config();
 const User = require("../models/User");
-const { resolveSoa } = require("dns");
-
-// YAML 파일 로드 및 파싱
-const yamlFilePath = path.join(__dirname, "..", "application.yml");
-let config;
-
-try {
-  const configFile = fs.readFileSync(yamlFilePath, "utf8");
-  config = yaml.load(configFile);
-} catch (error) {
-  console.error("Error reading YAML file:", error);
-}
 
 //카카오 인가 코드로 로그인 진행
 const kakaoLogin = async (code, res) => {
@@ -23,10 +8,10 @@ const kakaoLogin = async (code, res) => {
     //인가 코드로 엑세스 토큰 요청
     const requestData = {
       grant_type: "authorization_code",
-      client_id: config.kakao.client_id,
-      redirect_uri: config.kakao.redirect_url,
+      client_id: process.env.KAKAO_CLIENT_ID,
+      redirect_uri: process.env.KAKAO_REDIRECT_URL,
       code: code,
-      client_secret: config.kakao.client_secret,
+      client_secret: process.env.KAKAO_CLIENT_SECRET,
     };
 
     const params = new URLSearchParams(requestData).toString();
