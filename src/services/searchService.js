@@ -211,6 +211,7 @@ const contentFilter = (columnName, data) => {
 
 const searchWithIndexing = async (req) => {
   let query = "";
+  let saveResult;
 
   const conditionMap = new Map();
 
@@ -227,6 +228,15 @@ const searchWithIndexing = async (req) => {
     //"키워드" 검색일 경우
     if (column === "keyword") {
       query += `MATCH (place_name) AGAINST ('${conditionMap.get(column)}')`;
+
+      //유저별 키워드 히스토리 저장
+      const { userId } = req.params;
+      const save = await Venue.saveHistoryByUserId(
+        userId,
+        conditionMap.get(column)
+      );
+
+      saveResult = save ? "success" : "fail";
 
       //"필터" 검색일 경우
     } else {
@@ -276,7 +286,10 @@ const searchWithIndexing = async (req) => {
       ? await Venue.getAllList()
       : await Venue.getSearchResult(query);
 
-  return searchResult;
+  return {
+    searchResult: searchResult,
+    saveResult: saveResult,
+  };
 };
 
 const columnMapping = {
@@ -348,4 +361,25 @@ const searchVenueInfo = async ([mapId, isSummary], res) => {
   }
 };
 
-module.exports = { searchByKeywords, searchVenueInfo, searchWithIndexing };
+const getSearchHistory = async (userId) => {
+  try {
+    const history = await Venue.getHistoryByUserId(userId);
+
+    return {
+      history: history,
+      getList: true,
+    };
+  } catch (err) {
+    return {
+      err: err,
+      getList: false,
+    };
+  }
+};
+
+module.exports = {
+  searchByKeywords,
+  searchVenueInfo,
+  searchWithIndexing,
+  getSearchHistory,
+};

@@ -1,4 +1,5 @@
 const dbConnection = require("../utils/db");
+const User = require("./User");
 
 const getAllList = async () => {
   const query =
@@ -36,6 +37,32 @@ const findBymapId = async (mapId) => {
   return venueDetail;
 };
 
+const saveHistoryByUserId = async (userId, keyword) => {
+  let result;
+  const user = await User.findOneByUserId(userId);
+
+  if (user.length === 0) {
+    result = false;
+  } else {
+    const query = `INSERT INTO searchHistory (search_text, user_id) VALUES ('${keyword}', ${userId})`;
+    const historyResult = await doQuery(query);
+
+    const serverStatus = historyResult.serverStatus;
+    result = serverStatus === 2 ? true : false;
+  }
+
+  return result;
+};
+
+const getHistoryByUserId = async (userId) => {
+  const query = `select * from searchHistory
+                  WHERE user_id = ${userId}`;
+
+  const history = await doQuery(query);
+
+  return history;
+};
+
 const doQuery = (query) => {
   return new Promise((resolve, reject) => {
     dbConnection.query(query, (err, rows) => {
@@ -48,4 +75,10 @@ const doQuery = (query) => {
   });
 };
 
-module.exports = { getAllList, findBymapId, getSearchResult };
+module.exports = {
+  getAllList,
+  findBymapId,
+  getSearchResult,
+  getHistoryByUserId,
+  saveHistoryByUserId,
+};

@@ -37,12 +37,13 @@ const searchWithIndexing = async (req, res) => {
     const { keyword } = req.query;
     const isKeywordExist = keyword === undefined ? false : true;
 
-    const totalCnt = result.length;
+    const totalCnt = result.searchResult.length;
 
     return res.json({
-      result: result,
+      searchResult: result.searchResult,
       total: totalCnt,
       isKeywordExist: isKeywordExist,
+      saveResult: result.saveResult,
     });
   } catch (err) {
     return res.send(err);
@@ -69,10 +70,26 @@ const weddingDetail = async (req, res) => {
   return venueDetail;
 };
 
+//유저별 검색 히스토리 불러오기
+const userSearchHistory = async (req, res) => {
+  // #swagger.tags = ['Search']
+  // #swagger.summary = '유저별 검색 히스토리 불러오기'
+  const { userId } = req.params;
+  const history = await searchService.getSearchHistory(userId, res);
+
+  return res.json({
+    history: history.history,
+    total: history.history.length,
+    getList: history.getList,
+    err: history.err,
+  });
+};
+
 module.exports = {
   searchController,
   searchByKeywords,
   searchWithIndexing,
   weddingDetail,
   weddingSummary,
+  userSearchHistory,
 };
