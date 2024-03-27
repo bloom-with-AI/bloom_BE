@@ -104,6 +104,62 @@
         }
       }
     },
+    "/chat/": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "챗봇 대화 기록",
+        "description": "",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "챗봇 답변",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "example": "any"
+                },
+                "message": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/search/map": {
       "get": {
         "tags": [
@@ -125,7 +181,7 @@
         }
       }
     },
-    "/search/map/wedding": {
+    "/search/map/wedding/{userId}": {
       "get": {
         "tags": [
           "Search"
@@ -133,6 +189,12 @@
         "summary": "키워드 검색(Index)",
         "description": "",
         "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "keyword",
             "in": "query",
@@ -190,58 +252,24 @@
         }
       }
     },
-    "/chat/": {
+    "/search/recent-search-keyword/{userId}": {
       "get": {
         "tags": [
-          "Chat"
+          "Search"
         ],
-        "summary": "챗봇 대화 기록",
+        "summary": "유저별 검색 히스토리 불러오기",
         "description": "",
         "parameters": [
           {
             "name": "userId",
-            "in": "query",
+            "in": "path",
+            "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "챗봇 답변",
-        "description": "",
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userId": {
-                  "example": "any"
-                },
-                "message": {
-                  "example": "any"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
