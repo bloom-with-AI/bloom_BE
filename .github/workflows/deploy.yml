@@ -1,0 +1,50 @@
+name: Node.js dev CICD
+
+on:
+  push:
+    branches: ["develop"]
+  pull_request:
+    branches: ["develop"]
+
+jobs:
+  push_to_registry:
+    name: Push to container registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to container registry
+        run: echo "${{ secrets.SECRET_KEY }}" | docker login -u "${{ secrets.ACCESS_KEY }}" --password-stdin
+
+      - name: docker image build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.CONTAINER_REGISTRY }}/bloom_backend:${{github.run_number}}
+          secrets: |
+            GIT_AUTH_TOKEN=${{ secrets.GIT_TOKEN }}
+
+  pull_from_registry:
+    name: Connect server ssh and pull from container registry
+    needs: push_to_registry
+    runs-on: ubuntu-latest
+    steps:
+      - name: connect SSH and pull docker image
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_HOST }}
+          username: ${{ secrets.DEV_USERNAME }}
+          key: ${{ secrets.DEV_KEY }}
+          port: ${{ secrets.DEV_PORT }}
+          script: |
+            docker pull ${{ secrets.CONTAINER_REGISTRY }}/bloom_backend:${{github.run_number}}
+            docker stop $(docker ps -a -q)
+            docker rm $(docker ps -a -q)
+            docker run -d -p 80:8080 --env-file .env ${{ secrets.CONTAINER_REGISTRY }}/bloom_backend:${{github.run_number}}
+            docker image prune -f
